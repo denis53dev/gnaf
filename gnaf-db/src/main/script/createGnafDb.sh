@@ -22,11 +22,11 @@ unzipped=$dataDir/unzipped
 # get dir path where the zip file's */Extras/ will be extracted (contains release month so releases don't clobber each other)
 # get path from zip, discard leading info up to time and following spaces, keep the rest apart from the trailing /
 # maybe a bit too brittle?
-gnafExtras="$unzipped/$( unzip -l "$zip" '*/Extras/' | sed -rn '/Extras/s~^.*[0-9][0-9]:[0-9][0-9] *(.*)/$~\1~p' )"
+gnafExtras="$unzipped/$( unzip -l "$zip" '*/Extras/*' | sed -rn '/Extras/{s~^.*[0-9][0-9]:[0-9][0-9] *(.*/Extras).*$~\1~p;q}' )"
 # unzip unless $gnafExtras already exists 
 [[ -d "$gnafExtras" ]] || ( mkdir -p $unzipped; cd $unzipped; unzip $zip )
 # get dir path parent of Standard/
-gnafData="$unzipped/$( unzip -l "$zip" '*/Standard/' | sed -rn '/Standard/s~^.*[0-9][0-9]:[0-9][0-9] *(.*)/Standard/$~\1~p' )"
+gnafData="$unzipped/$( unzip -l "$zip" '*/Standard/*' | sed -rn '/Standard/{s~^.*[0-9][0-9]:[0-9][0-9] *(.*)/Standard/.*$~\1~p;q}' )"
 
 mkdir -p target/generated
 cat > target/generated/version.json <<EoF
