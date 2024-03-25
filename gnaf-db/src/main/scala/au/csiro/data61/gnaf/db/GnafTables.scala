@@ -1,6 +1,9 @@
 package au.csiro.data61.gnaf.db
-
 // AUTO-GENERATED Slick data model
+/** Stand-alone Slick data model for immediate use */
+object Tables extends {
+  val profile = slick.driver.H2Driver
+} with Tables
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
 trait GnafTables {
@@ -13,7 +16,7 @@ trait GnafTables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(AddressAlias.schema, AddressAliasTypeAut.schema, AddressDefaultGeocode.schema, AddressDetail.schema, AddressMeshBlock2011.schema, AddressSite.schema, AddressSiteGeocode.schema, AddressTypeAut.schema, AddressView.schema, FlatTypeAut.schema, GeocodedLevelTypeAut.schema, GeocodeReliabilityAut.schema, GeocodeTypeAut.schema, LevelTypeAut.schema, Locality.schema, LocalityAlias.schema, LocalityAliasTypeAut.schema, LocalityClassAut.schema, LocalityNeighbour.schema, LocalityPoint.schema, Mb2011.schema, MbMatchCodeAut.schema, PrimarySecondary.schema, PsJoinTypeAut.schema, State.schema, StreetClassAut.schema, StreetLocality.schema, StreetLocalityAlias.schema, StreetLocalityAliasTypeAut.schema, StreetLocalityPoint.schema, StreetSuffixAut.schema, StreetTypeAut.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(AddressAlias.schema, AddressAliasTypeAut.schema, AddressChangeTypeAut.schema, AddressDefaultGeocode.schema, AddressDetail.schema, AddressFeature.schema, AddressMeshBlock2016.schema, AddressMeshBlock2021.schema, AddressSite.schema, AddressSiteGeocode.schema, AddressTypeAut.schema, FlatTypeAut.schema, GeocodedLevelTypeAut.schema, GeocodeReliabilityAut.schema, GeocodeTypeAut.schema, LevelTypeAut.schema, Locality.schema, LocalityAlias.schema, LocalityAliasTypeAut.schema, LocalityClassAut.schema, LocalityNeighbour.schema, LocalityPoint.schema, Mb2016.schema, Mb2021.schema, MbMatchCodeAut.schema, PrimarySecondary.schema, PsJoinTypeAut.schema, State.schema, StreetClassAut.schema, StreetLocality.schema, StreetLocalityAlias.schema, StreetLocalityAliasTypeAut.schema, StreetLocalityPoint.schema, StreetSuffixAut.schema, StreetTypeAut.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -88,6 +91,32 @@ trait GnafTables {
   /** Collection-like TableQuery object for table AddressAliasTypeAut */
   lazy val AddressAliasTypeAut = new TableQuery(tag => new AddressAliasTypeAut(tag))
 
+  /** Entity class storing rows of table AddressChangeTypeAut
+   *  @param code Database column CODE SqlType(VARCHAR), PrimaryKey, Length(50,true)
+   *  @param name Database column NAME SqlType(VARCHAR), Length(100,true)
+   *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(500,true) */
+  case class AddressChangeTypeAutRow(code: String, name: String, description: Option[String])
+  /** GetResult implicit for fetching AddressChangeTypeAutRow objects using plain SQL queries */
+  implicit def GetResultAddressChangeTypeAutRow(implicit e0: GR[String], e1: GR[Option[String]]): GR[AddressChangeTypeAutRow] = GR{
+    prs => import prs._
+    AddressChangeTypeAutRow.tupled((<<[String], <<[String], <<?[String]))
+  }
+  /** Table description of table ADDRESS_CHANGE_TYPE_AUT. Objects of this class serve as prototypes for rows in queries. */
+  class AddressChangeTypeAut(_tableTag: Tag) extends Table[AddressChangeTypeAutRow](_tableTag, "ADDRESS_CHANGE_TYPE_AUT") {
+    def * = (code, name, description) <> (AddressChangeTypeAutRow.tupled, AddressChangeTypeAutRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(code), Rep.Some(name), description).shaped.<>({r=>import r._; _1.map(_=> AddressChangeTypeAutRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column CODE SqlType(VARCHAR), PrimaryKey, Length(50,true) */
+    val code: Rep[String] = column[String]("CODE", O.PrimaryKey, O.Length(50,varying=true))
+    /** Database column NAME SqlType(VARCHAR), Length(100,true) */
+    val name: Rep[String] = column[String]("NAME", O.Length(100,varying=true))
+    /** Database column DESCRIPTION SqlType(VARCHAR), Length(500,true) */
+    val description: Rep[Option[String]] = column[Option[String]]("DESCRIPTION", O.Length(500,varying=true))
+  }
+  /** Collection-like TableQuery object for table AddressChangeTypeAut */
+  lazy val AddressChangeTypeAut = new TableQuery(tag => new AddressChangeTypeAut(tag))
+
   /** Entity class storing rows of table AddressDefaultGeocode
    *  @param addressDefaultGeocodePid Database column ADDRESS_DEFAULT_GEOCODE_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
    *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
@@ -154,8 +183,8 @@ trait GnafTables {
     val dateLastModified: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_LAST_MODIFIED")
     /** Database column DATE_RETIRED SqlType(DATE) */
     val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
-    /** Database column BUILDING_NAME SqlType(VARCHAR), Length(45,true) */
-    val buildingName: Rep[Option[String]] = column[Option[String]]("BUILDING_NAME", O.Length(45,varying=true))
+    /** Database column BUILDING_NAME SqlType(VARCHAR), Length(200,true) */
+    val buildingName: Rep[Option[String]] = column[Option[String]]("BUILDING_NAME", O.Length(200,varying=true))
     /** Database column LOT_NUMBER_PREFIX SqlType(VARCHAR), Length(2,true) */
     val lotNumberPrefix: Rep[Option[String]] = column[Option[String]]("LOT_NUMBER_PREFIX", O.Length(2,varying=true))
     /** Database column LOT_NUMBER SqlType(VARCHAR), Length(5,true) */
@@ -233,27 +262,67 @@ trait GnafTables {
   /** Collection-like TableQuery object for table AddressDetail */
   lazy val AddressDetail = new TableQuery(tag => new AddressDetail(tag))
 
-  /** Entity class storing rows of table AddressMeshBlock2011
-   *  @param addressMeshBlock2011Pid Database column ADDRESS_MESH_BLOCK_2011_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
+  /** Entity class storing rows of table AddressFeature
+   *  @param addressFeatureId Database column ADDRESS_FEATURE_ID SqlType(VARCHAR), PrimaryKey, Length(16,true)
+   *  @param addressFeaturePid Database column ADDRESS_FEATURE_PID SqlType(VARCHAR), Length(16,true)
+   *  @param addressDetailPid Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true)
+   *  @param dateAddressDetailCreated Database column DATE_ADDRESS_DETAIL_CREATED SqlType(DATE)
+   *  @param dateAddressDetailRetired Database column DATE_ADDRESS_DETAIL_RETIRED SqlType(DATE)
+   *  @param addressChangeTypeCode Database column ADDRESS_CHANGE_TYPE_CODE SqlType(VARCHAR), Length(50,true) */
+  case class AddressFeatureRow(addressFeatureId: String, addressFeaturePid: String, addressDetailPid: String, dateAddressDetailCreated: java.sql.Date, dateAddressDetailRetired: Option[java.sql.Date], addressChangeTypeCode: Option[String])
+  /** GetResult implicit for fetching AddressFeatureRow objects using plain SQL queries */
+  implicit def GetResultAddressFeatureRow(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]], e3: GR[Option[String]]): GR[AddressFeatureRow] = GR{
+    prs => import prs._
+    AddressFeatureRow.tupled((<<[String], <<[String], <<[String], <<[java.sql.Date], <<?[java.sql.Date], <<?[String]))
+  }
+  /** Table description of table ADDRESS_FEATURE. Objects of this class serve as prototypes for rows in queries. */
+  class AddressFeature(_tableTag: Tag) extends Table[AddressFeatureRow](_tableTag, "ADDRESS_FEATURE") {
+    def * = (addressFeatureId, addressFeaturePid, addressDetailPid, dateAddressDetailCreated, dateAddressDetailRetired, addressChangeTypeCode) <> (AddressFeatureRow.tupled, AddressFeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(addressFeatureId), Rep.Some(addressFeaturePid), Rep.Some(addressDetailPid), Rep.Some(dateAddressDetailCreated), dateAddressDetailRetired, addressChangeTypeCode).shaped.<>({r=>import r._; _1.map(_=> AddressFeatureRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ADDRESS_FEATURE_ID SqlType(VARCHAR), PrimaryKey, Length(16,true) */
+    val addressFeatureId: Rep[String] = column[String]("ADDRESS_FEATURE_ID", O.PrimaryKey, O.Length(16,varying=true))
+    /** Database column ADDRESS_FEATURE_PID SqlType(VARCHAR), Length(16,true) */
+    val addressFeaturePid: Rep[String] = column[String]("ADDRESS_FEATURE_PID", O.Length(16,varying=true))
+    /** Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true) */
+    val addressDetailPid: Rep[String] = column[String]("ADDRESS_DETAIL_PID", O.Length(15,varying=true))
+    /** Database column DATE_ADDRESS_DETAIL_CREATED SqlType(DATE) */
+    val dateAddressDetailCreated: Rep[java.sql.Date] = column[java.sql.Date]("DATE_ADDRESS_DETAIL_CREATED")
+    /** Database column DATE_ADDRESS_DETAIL_RETIRED SqlType(DATE) */
+    val dateAddressDetailRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_ADDRESS_DETAIL_RETIRED")
+    /** Database column ADDRESS_CHANGE_TYPE_CODE SqlType(VARCHAR), Length(50,true) */
+    val addressChangeTypeCode: Rep[Option[String]] = column[Option[String]]("ADDRESS_CHANGE_TYPE_CODE", O.Length(50,varying=true))
+
+    /** Foreign key referencing AddressChangeTypeAut (database name ADDRESS_FEATURE_FK1) */
+    lazy val addressChangeTypeAutFk = foreignKey("ADDRESS_FEATURE_FK1", addressChangeTypeCode, AddressChangeTypeAut)(r => Rep.Some(r.code), onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing AddressDetail (database name ADDRESS_FEATURE_FK2) */
+    lazy val addressDetailFk = foreignKey("ADDRESS_FEATURE_FK2", addressDetailPid, AddressDetail)(r => r.addressDetailPid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+  }
+  /** Collection-like TableQuery object for table AddressFeature */
+  lazy val AddressFeature = new TableQuery(tag => new AddressFeature(tag))
+
+  /** Entity class storing rows of table AddressMeshBlock2016
+   *  @param addressMeshBlock2016Pid Database column ADDRESS_MESH_BLOCK_2016_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
    *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
    *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
    *  @param addressDetailPid Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true)
    *  @param mbMatchCode Database column MB_MATCH_CODE SqlType(VARCHAR), Length(15,true)
-   *  @param mb2011Pid Database column MB_2011_PID SqlType(VARCHAR), Length(15,true) */
-  case class AddressMeshBlock2011Row(addressMeshBlock2011Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], addressDetailPid: String, mbMatchCode: String, mb2011Pid: String)
-  /** GetResult implicit for fetching AddressMeshBlock2011Row objects using plain SQL queries */
-  implicit def GetResultAddressMeshBlock2011Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[AddressMeshBlock2011Row] = GR{
+   *  @param mb2016Pid Database column MB_2016_PID SqlType(VARCHAR), Length(15,true) */
+  case class AddressMeshBlock2016Row(addressMeshBlock2016Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], addressDetailPid: String, mbMatchCode: String, mb2016Pid: String)
+  /** GetResult implicit for fetching AddressMeshBlock2016Row objects using plain SQL queries */
+  implicit def GetResultAddressMeshBlock2016Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[AddressMeshBlock2016Row] = GR{
     prs => import prs._
-    AddressMeshBlock2011Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String], <<[String], <<[String]))
+    AddressMeshBlock2016Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String], <<[String], <<[String]))
   }
-  /** Table description of table ADDRESS_MESH_BLOCK_2011. Objects of this class serve as prototypes for rows in queries. */
-  class AddressMeshBlock2011(_tableTag: Tag) extends Table[AddressMeshBlock2011Row](_tableTag, "ADDRESS_MESH_BLOCK_2011") {
-    def * = (addressMeshBlock2011Pid, dateCreated, dateRetired, addressDetailPid, mbMatchCode, mb2011Pid) <> (AddressMeshBlock2011Row.tupled, AddressMeshBlock2011Row.unapply)
+  /** Table description of table ADDRESS_MESH_BLOCK_2016. Objects of this class serve as prototypes for rows in queries. */
+  class AddressMeshBlock2016(_tableTag: Tag) extends Table[AddressMeshBlock2016Row](_tableTag, "ADDRESS_MESH_BLOCK_2016") {
+    def * = (addressMeshBlock2016Pid, dateCreated, dateRetired, addressDetailPid, mbMatchCode, mb2016Pid) <> (AddressMeshBlock2016Row.tupled, AddressMeshBlock2016Row.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(addressMeshBlock2011Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(addressDetailPid), Rep.Some(mbMatchCode), Rep.Some(mb2011Pid)).shaped.<>({r=>import r._; _1.map(_=> AddressMeshBlock2011Row.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(addressMeshBlock2016Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(addressDetailPid), Rep.Some(mbMatchCode), Rep.Some(mb2016Pid)).shaped.<>({r=>import r._; _1.map(_=> AddressMeshBlock2016Row.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column ADDRESS_MESH_BLOCK_2011_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
-    val addressMeshBlock2011Pid: Rep[String] = column[String]("ADDRESS_MESH_BLOCK_2011_PID", O.PrimaryKey, O.Length(15,varying=true))
+    /** Database column ADDRESS_MESH_BLOCK_2016_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
+    val addressMeshBlock2016Pid: Rep[String] = column[String]("ADDRESS_MESH_BLOCK_2016_PID", O.PrimaryKey, O.Length(15,varying=true))
     /** Database column DATE_CREATED SqlType(DATE) */
     val dateCreated: Rep[java.sql.Date] = column[java.sql.Date]("DATE_CREATED")
     /** Database column DATE_RETIRED SqlType(DATE) */
@@ -262,25 +331,67 @@ trait GnafTables {
     val addressDetailPid: Rep[String] = column[String]("ADDRESS_DETAIL_PID", O.Length(15,varying=true))
     /** Database column MB_MATCH_CODE SqlType(VARCHAR), Length(15,true) */
     val mbMatchCode: Rep[String] = column[String]("MB_MATCH_CODE", O.Length(15,varying=true))
-    /** Database column MB_2011_PID SqlType(VARCHAR), Length(15,true) */
-    val mb2011Pid: Rep[String] = column[String]("MB_2011_PID", O.Length(15,varying=true))
+    /** Database column MB_2016_PID SqlType(VARCHAR), Length(15,true) */
+    val mb2016Pid: Rep[String] = column[String]("MB_2016_PID", O.Length(15,varying=true))
 
-    /** Foreign key referencing AddressDetail (database name ADDRESS_MESH_BLOCK_2011_FK1) */
-    lazy val addressDetailFk = foreignKey("ADDRESS_MESH_BLOCK_2011_FK1", addressDetailPid, AddressDetail)(r => r.addressDetailPid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing Mb2011 (database name ADDRESS_MESH_BLOCK_2011_FK2) */
-    lazy val mb2011Fk = foreignKey("ADDRESS_MESH_BLOCK_2011_FK2", mb2011Pid, Mb2011)(r => r.mb2011Pid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing MbMatchCodeAut (database name ADDRESS_MESH_BLOCK_2011_FK3) */
-    lazy val mbMatchCodeAutFk = foreignKey("ADDRESS_MESH_BLOCK_2011_FK3", mbMatchCode, MbMatchCodeAut)(r => r.code, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing AddressDetail (database name ADDRESS_MESH_BLOCK_2016_FK1) */
+    lazy val addressDetailFk = foreignKey("ADDRESS_MESH_BLOCK_2016_FK1", addressDetailPid, AddressDetail)(r => r.addressDetailPid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing Mb2016 (database name ADDRESS_MESH_BLOCK_2016_FK2) */
+    lazy val mb2016Fk = foreignKey("ADDRESS_MESH_BLOCK_2016_FK2", mb2016Pid, Mb2016)(r => r.mb2016Pid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing MbMatchCodeAut (database name ADDRESS_MESH_BLOCK_2016_FK3) */
+    lazy val mbMatchCodeAutFk = foreignKey("ADDRESS_MESH_BLOCK_2016_FK3", mbMatchCode, MbMatchCodeAut)(r => r.code, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
   }
-  /** Collection-like TableQuery object for table AddressMeshBlock2011 */
-  lazy val AddressMeshBlock2011 = new TableQuery(tag => new AddressMeshBlock2011(tag))
+  /** Collection-like TableQuery object for table AddressMeshBlock2016 */
+  lazy val AddressMeshBlock2016 = new TableQuery(tag => new AddressMeshBlock2016(tag))
+
+  /** Entity class storing rows of table AddressMeshBlock2021
+   *  @param addressMeshBlock2021Pid Database column ADDRESS_MESH_BLOCK_2021_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
+   *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
+   *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
+   *  @param addressDetailPid Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true)
+   *  @param mbMatchCode Database column MB_MATCH_CODE SqlType(VARCHAR), Length(15,true)
+   *  @param mb2021Pid Database column MB_2021_PID SqlType(VARCHAR), Length(15,true) */
+  case class AddressMeshBlock2021Row(addressMeshBlock2021Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], addressDetailPid: String, mbMatchCode: String, mb2021Pid: String)
+  /** GetResult implicit for fetching AddressMeshBlock2021Row objects using plain SQL queries */
+  implicit def GetResultAddressMeshBlock2021Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[AddressMeshBlock2021Row] = GR{
+    prs => import prs._
+    AddressMeshBlock2021Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String], <<[String], <<[String]))
+  }
+  /** Table description of table ADDRESS_MESH_BLOCK_2021. Objects of this class serve as prototypes for rows in queries. */
+  class AddressMeshBlock2021(_tableTag: Tag) extends Table[AddressMeshBlock2021Row](_tableTag, "ADDRESS_MESH_BLOCK_2021") {
+    def * = (addressMeshBlock2021Pid, dateCreated, dateRetired, addressDetailPid, mbMatchCode, mb2021Pid) <> (AddressMeshBlock2021Row.tupled, AddressMeshBlock2021Row.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(addressMeshBlock2021Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(addressDetailPid), Rep.Some(mbMatchCode), Rep.Some(mb2021Pid)).shaped.<>({r=>import r._; _1.map(_=> AddressMeshBlock2021Row.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ADDRESS_MESH_BLOCK_2021_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
+    val addressMeshBlock2021Pid: Rep[String] = column[String]("ADDRESS_MESH_BLOCK_2021_PID", O.PrimaryKey, O.Length(15,varying=true))
+    /** Database column DATE_CREATED SqlType(DATE) */
+    val dateCreated: Rep[java.sql.Date] = column[java.sql.Date]("DATE_CREATED")
+    /** Database column DATE_RETIRED SqlType(DATE) */
+    val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
+    /** Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true) */
+    val addressDetailPid: Rep[String] = column[String]("ADDRESS_DETAIL_PID", O.Length(15,varying=true))
+    /** Database column MB_MATCH_CODE SqlType(VARCHAR), Length(15,true) */
+    val mbMatchCode: Rep[String] = column[String]("MB_MATCH_CODE", O.Length(15,varying=true))
+    /** Database column MB_2021_PID SqlType(VARCHAR), Length(15,true) */
+    val mb2021Pid: Rep[String] = column[String]("MB_2021_PID", O.Length(15,varying=true))
+
+    /** Foreign key referencing AddressDetail (database name ADDRESS_MESH_BLOCK_2021_FK1) */
+    lazy val addressDetailFk = foreignKey("ADDRESS_MESH_BLOCK_2021_FK1", addressDetailPid, AddressDetail)(r => r.addressDetailPid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing Mb2021 (database name ADDRESS_MESH_BLOCK_2021_FK2) */
+    lazy val mb2021Fk = foreignKey("ADDRESS_MESH_BLOCK_2021_FK2", mb2021Pid, Mb2021)(r => r.mb2021Pid, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing MbMatchCodeAut (database name ADDRESS_MESH_BLOCK_2021_FK3) */
+    lazy val mbMatchCodeAutFk = foreignKey("ADDRESS_MESH_BLOCK_2021_FK3", mbMatchCode, MbMatchCodeAut)(r => r.code, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+  }
+  /** Collection-like TableQuery object for table AddressMeshBlock2021 */
+  lazy val AddressMeshBlock2021 = new TableQuery(tag => new AddressMeshBlock2021(tag))
 
   /** Entity class storing rows of table AddressSite
    *  @param addressSitePid Database column ADDRESS_SITE_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
    *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
    *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
    *  @param addressType Database column ADDRESS_TYPE SqlType(VARCHAR), Length(8,true)
-   *  @param addressSiteName Database column ADDRESS_SITE_NAME SqlType(VARCHAR), Length(45,true) */
+   *  @param addressSiteName Database column ADDRESS_SITE_NAME SqlType(VARCHAR), Length(200,true) */
   case class AddressSiteRow(addressSitePid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], addressType: Option[String], addressSiteName: Option[String])
   /** GetResult implicit for fetching AddressSiteRow objects using plain SQL queries */
   implicit def GetResultAddressSiteRow(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]], e3: GR[Option[String]]): GR[AddressSiteRow] = GR{
@@ -301,8 +412,8 @@ trait GnafTables {
     val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
     /** Database column ADDRESS_TYPE SqlType(VARCHAR), Length(8,true) */
     val addressType: Rep[Option[String]] = column[Option[String]]("ADDRESS_TYPE", O.Length(8,varying=true))
-    /** Database column ADDRESS_SITE_NAME SqlType(VARCHAR), Length(45,true) */
-    val addressSiteName: Rep[Option[String]] = column[Option[String]]("ADDRESS_SITE_NAME", O.Length(45,varying=true))
+    /** Database column ADDRESS_SITE_NAME SqlType(VARCHAR), Length(200,true) */
+    val addressSiteName: Rep[Option[String]] = column[Option[String]]("ADDRESS_SITE_NAME", O.Length(200,varying=true))
 
     /** Foreign key referencing AddressTypeAut (database name ADDRESS_SITE_FK1) */
     lazy val addressTypeAutFk = foreignKey("ADDRESS_SITE_FK1", addressType, AddressTypeAut)(r => Rep.Some(r.code), onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
@@ -315,7 +426,7 @@ trait GnafTables {
    *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
    *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
    *  @param addressSitePid Database column ADDRESS_SITE_PID SqlType(VARCHAR), Length(15,true)
-   *  @param geocodeSiteName Database column GEOCODE_SITE_NAME SqlType(VARCHAR), Length(46,true)
+   *  @param geocodeSiteName Database column GEOCODE_SITE_NAME SqlType(VARCHAR), Length(200,true)
    *  @param geocodeSiteDescription Database column GEOCODE_SITE_DESCRIPTION SqlType(VARCHAR), Length(45,true)
    *  @param geocodeTypeCode Database column GEOCODE_TYPE_CODE SqlType(VARCHAR), Length(4,true)
    *  @param reliabilityCode Database column RELIABILITY_CODE SqlType(INTEGER)
@@ -344,8 +455,8 @@ trait GnafTables {
     val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
     /** Database column ADDRESS_SITE_PID SqlType(VARCHAR), Length(15,true) */
     val addressSitePid: Rep[Option[String]] = column[Option[String]]("ADDRESS_SITE_PID", O.Length(15,varying=true))
-    /** Database column GEOCODE_SITE_NAME SqlType(VARCHAR), Length(46,true) */
-    val geocodeSiteName: Rep[Option[String]] = column[Option[String]]("GEOCODE_SITE_NAME", O.Length(46,varying=true))
+    /** Database column GEOCODE_SITE_NAME SqlType(VARCHAR), Length(200,true) */
+    val geocodeSiteName: Rep[Option[String]] = column[Option[String]]("GEOCODE_SITE_NAME", O.Length(200,varying=true))
     /** Database column GEOCODE_SITE_DESCRIPTION SqlType(VARCHAR), Length(45,true) */
     val geocodeSiteDescription: Rep[Option[String]] = column[Option[String]]("GEOCODE_SITE_DESCRIPTION", O.Length(45,varying=true))
     /** Database column GEOCODE_TYPE_CODE SqlType(VARCHAR), Length(4,true) */
@@ -398,101 +509,6 @@ trait GnafTables {
   }
   /** Collection-like TableQuery object for table AddressTypeAut */
   lazy val AddressTypeAut = new TableQuery(tag => new AddressTypeAut(tag))
-
-  /** Row type of table AddressView */
-  type AddressViewRow = HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[Int],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[Int],HCons[Option[String],HCons[Option[String],HCons[Option[Int],HCons[Option[String],HCons[Option[String],HCons[Option[Int],HCons[Option[String],HCons[Option[String],HCons[Option[Char],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[String],HCons[Option[scala.math.BigDecimal],HCons[Option[scala.math.BigDecimal],HCons[Option[String],HCons[Option[Int],HCons[Option[Char],HCons[Option[Char],HCons[Option[String],HCons[Option[java.sql.Date],HNil]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
-  /** Constructor for AddressViewRow providing default values if available in the database schema. */
-  def AddressViewRow(addressDetailPid: Option[String], streetLocalityPid: Option[String], localityPid: Option[String], buildingName: Option[String], lotNumberPrefix: Option[String], lotNumber: Option[String], lotNumberSuffix: Option[String], flatType: Option[String], flatNumberPrefix: Option[String], flatNumber: Option[Int], flatNumberSuffix: Option[String], levelType: Option[String], levelNumberPrefix: Option[String], levelNumber: Option[Int], levelNumberSuffix: Option[String], numberFirstPrefix: Option[String], numberFirst: Option[Int], numberFirstSuffix: Option[String], numberLastPrefix: Option[String], numberLast: Option[Int], numberLastSuffix: Option[String], streetName: Option[String], streetClassCode: Option[Char], streetClassType: Option[String], streetTypeCode: Option[String], streetSuffixCode: Option[String], streetSuffixType: Option[String], localityName: Option[String], stateAbbreviation: Option[String], postcode: Option[String], latitude: Option[scala.math.BigDecimal], longitude: Option[scala.math.BigDecimal], geocodeType: Option[String], confidence: Option[Int], aliasPrincipal: Option[Char], primarySecondary: Option[Char], legalParcelId: Option[String], dateCreated: Option[java.sql.Date]): AddressViewRow = {
-    addressDetailPid :: streetLocalityPid :: localityPid :: buildingName :: lotNumberPrefix :: lotNumber :: lotNumberSuffix :: flatType :: flatNumberPrefix :: flatNumber :: flatNumberSuffix :: levelType :: levelNumberPrefix :: levelNumber :: levelNumberSuffix :: numberFirstPrefix :: numberFirst :: numberFirstSuffix :: numberLastPrefix :: numberLast :: numberLastSuffix :: streetName :: streetClassCode :: streetClassType :: streetTypeCode :: streetSuffixCode :: streetSuffixType :: localityName :: stateAbbreviation :: postcode :: latitude :: longitude :: geocodeType :: confidence :: aliasPrincipal :: primarySecondary :: legalParcelId :: dateCreated :: HNil
-  }
-  /** GetResult implicit for fetching AddressViewRow objects using plain SQL queries */
-  implicit def GetResultAddressViewRow(implicit e0: GR[Option[String]], e1: GR[Option[Int]], e2: GR[Option[Char]], e3: GR[Option[scala.math.BigDecimal]], e4: GR[Option[java.sql.Date]]): GR[AddressViewRow] = GR{
-    prs => import prs._
-    <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[Int] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[Int] :: <<?[String] :: <<?[String] :: <<?[Int] :: <<?[String] :: <<?[String] :: <<?[Int] :: <<?[String] :: <<?[String] :: <<?[Char] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[String] :: <<?[scala.math.BigDecimal] :: <<?[scala.math.BigDecimal] :: <<?[String] :: <<?[Int] :: <<?[Char] :: <<?[Char] :: <<?[String] :: <<?[java.sql.Date] :: HNil
-  }
-  /** Table description of table ADDRESS_VIEW. Objects of this class serve as prototypes for rows in queries. */
-  class AddressView(_tableTag: Tag) extends Table[AddressViewRow](_tableTag, "ADDRESS_VIEW") {
-    def * = addressDetailPid :: streetLocalityPid :: localityPid :: buildingName :: lotNumberPrefix :: lotNumber :: lotNumberSuffix :: flatType :: flatNumberPrefix :: flatNumber :: flatNumberSuffix :: levelType :: levelNumberPrefix :: levelNumber :: levelNumberSuffix :: numberFirstPrefix :: numberFirst :: numberFirstSuffix :: numberLastPrefix :: numberLast :: numberLastSuffix :: streetName :: streetClassCode :: streetClassType :: streetTypeCode :: streetSuffixCode :: streetSuffixType :: localityName :: stateAbbreviation :: postcode :: latitude :: longitude :: geocodeType :: confidence :: aliasPrincipal :: primarySecondary :: legalParcelId :: dateCreated :: HNil
-
-    /** Database column ADDRESS_DETAIL_PID SqlType(VARCHAR), Length(15,true) */
-    val addressDetailPid: Rep[Option[String]] = column[Option[String]]("ADDRESS_DETAIL_PID", O.Length(15,varying=true))
-    /** Database column STREET_LOCALITY_PID SqlType(VARCHAR), Length(15,true) */
-    val streetLocalityPid: Rep[Option[String]] = column[Option[String]]("STREET_LOCALITY_PID", O.Length(15,varying=true))
-    /** Database column LOCALITY_PID SqlType(VARCHAR), Length(15,true) */
-    val localityPid: Rep[Option[String]] = column[Option[String]]("LOCALITY_PID", O.Length(15,varying=true))
-    /** Database column BUILDING_NAME SqlType(VARCHAR), Length(45,true) */
-    val buildingName: Rep[Option[String]] = column[Option[String]]("BUILDING_NAME", O.Length(45,varying=true))
-    /** Database column LOT_NUMBER_PREFIX SqlType(VARCHAR), Length(2,true) */
-    val lotNumberPrefix: Rep[Option[String]] = column[Option[String]]("LOT_NUMBER_PREFIX", O.Length(2,varying=true))
-    /** Database column LOT_NUMBER SqlType(VARCHAR), Length(5,true) */
-    val lotNumber: Rep[Option[String]] = column[Option[String]]("LOT_NUMBER", O.Length(5,varying=true))
-    /** Database column LOT_NUMBER_SUFFIX SqlType(VARCHAR), Length(2,true) */
-    val lotNumberSuffix: Rep[Option[String]] = column[Option[String]]("LOT_NUMBER_SUFFIX", O.Length(2,varying=true))
-    /** Database column FLAT_TYPE SqlType(VARCHAR), Length(50,true) */
-    val flatType: Rep[Option[String]] = column[Option[String]]("FLAT_TYPE", O.Length(50,varying=true))
-    /** Database column FLAT_NUMBER_PREFIX SqlType(VARCHAR), Length(2,true) */
-    val flatNumberPrefix: Rep[Option[String]] = column[Option[String]]("FLAT_NUMBER_PREFIX", O.Length(2,varying=true))
-    /** Database column FLAT_NUMBER SqlType(INTEGER) */
-    val flatNumber: Rep[Option[Int]] = column[Option[Int]]("FLAT_NUMBER")
-    /** Database column FLAT_NUMBER_SUFFIX SqlType(VARCHAR), Length(2,true) */
-    val flatNumberSuffix: Rep[Option[String]] = column[Option[String]]("FLAT_NUMBER_SUFFIX", O.Length(2,varying=true))
-    /** Database column LEVEL_TYPE SqlType(VARCHAR), Length(50,true) */
-    val levelType: Rep[Option[String]] = column[Option[String]]("LEVEL_TYPE", O.Length(50,varying=true))
-    /** Database column LEVEL_NUMBER_PREFIX SqlType(VARCHAR), Length(2,true) */
-    val levelNumberPrefix: Rep[Option[String]] = column[Option[String]]("LEVEL_NUMBER_PREFIX", O.Length(2,varying=true))
-    /** Database column LEVEL_NUMBER SqlType(INTEGER) */
-    val levelNumber: Rep[Option[Int]] = column[Option[Int]]("LEVEL_NUMBER")
-    /** Database column LEVEL_NUMBER_SUFFIX SqlType(VARCHAR), Length(2,true) */
-    val levelNumberSuffix: Rep[Option[String]] = column[Option[String]]("LEVEL_NUMBER_SUFFIX", O.Length(2,varying=true))
-    /** Database column NUMBER_FIRST_PREFIX SqlType(VARCHAR), Length(3,true) */
-    val numberFirstPrefix: Rep[Option[String]] = column[Option[String]]("NUMBER_FIRST_PREFIX", O.Length(3,varying=true))
-    /** Database column NUMBER_FIRST SqlType(INTEGER) */
-    val numberFirst: Rep[Option[Int]] = column[Option[Int]]("NUMBER_FIRST")
-    /** Database column NUMBER_FIRST_SUFFIX SqlType(VARCHAR), Length(2,true) */
-    val numberFirstSuffix: Rep[Option[String]] = column[Option[String]]("NUMBER_FIRST_SUFFIX", O.Length(2,varying=true))
-    /** Database column NUMBER_LAST_PREFIX SqlType(VARCHAR), Length(3,true) */
-    val numberLastPrefix: Rep[Option[String]] = column[Option[String]]("NUMBER_LAST_PREFIX", O.Length(3,varying=true))
-    /** Database column NUMBER_LAST SqlType(INTEGER) */
-    val numberLast: Rep[Option[Int]] = column[Option[Int]]("NUMBER_LAST")
-    /** Database column NUMBER_LAST_SUFFIX SqlType(VARCHAR), Length(2,true) */
-    val numberLastSuffix: Rep[Option[String]] = column[Option[String]]("NUMBER_LAST_SUFFIX", O.Length(2,varying=true))
-    /** Database column STREET_NAME SqlType(VARCHAR), Length(100,true) */
-    val streetName: Rep[Option[String]] = column[Option[String]]("STREET_NAME", O.Length(100,varying=true))
-    /** Database column STREET_CLASS_CODE SqlType(CHAR) */
-    val streetClassCode: Rep[Option[Char]] = column[Option[Char]]("STREET_CLASS_CODE")
-    /** Database column STREET_CLASS_TYPE SqlType(VARCHAR), Length(50,true) */
-    val streetClassType: Rep[Option[String]] = column[Option[String]]("STREET_CLASS_TYPE", O.Length(50,varying=true))
-    /** Database column STREET_TYPE_CODE SqlType(VARCHAR), Length(15,true) */
-    val streetTypeCode: Rep[Option[String]] = column[Option[String]]("STREET_TYPE_CODE", O.Length(15,varying=true))
-    /** Database column STREET_SUFFIX_CODE SqlType(VARCHAR), Length(15,true) */
-    val streetSuffixCode: Rep[Option[String]] = column[Option[String]]("STREET_SUFFIX_CODE", O.Length(15,varying=true))
-    /** Database column STREET_SUFFIX_TYPE SqlType(VARCHAR), Length(50,true) */
-    val streetSuffixType: Rep[Option[String]] = column[Option[String]]("STREET_SUFFIX_TYPE", O.Length(50,varying=true))
-    /** Database column LOCALITY_NAME SqlType(VARCHAR), Length(100,true) */
-    val localityName: Rep[Option[String]] = column[Option[String]]("LOCALITY_NAME", O.Length(100,varying=true))
-    /** Database column STATE_ABBREVIATION SqlType(VARCHAR), Length(3,true) */
-    val stateAbbreviation: Rep[Option[String]] = column[Option[String]]("STATE_ABBREVIATION", O.Length(3,varying=true))
-    /** Database column POSTCODE SqlType(VARCHAR), Length(4,true) */
-    val postcode: Rep[Option[String]] = column[Option[String]]("POSTCODE", O.Length(4,varying=true))
-    /** Database column LATITUDE SqlType(DECIMAL) */
-    val latitude: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("LATITUDE")
-    /** Database column LONGITUDE SqlType(DECIMAL) */
-    val longitude: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("LONGITUDE")
-    /** Database column GEOCODE_TYPE SqlType(VARCHAR), Length(50,true) */
-    val geocodeType: Rep[Option[String]] = column[Option[String]]("GEOCODE_TYPE", O.Length(50,varying=true))
-    /** Database column CONFIDENCE SqlType(INTEGER) */
-    val confidence: Rep[Option[Int]] = column[Option[Int]]("CONFIDENCE")
-    /** Database column ALIAS_PRINCIPAL SqlType(CHAR) */
-    val aliasPrincipal: Rep[Option[Char]] = column[Option[Char]]("ALIAS_PRINCIPAL")
-    /** Database column PRIMARY_SECONDARY SqlType(VARCHAR) */
-    val primarySecondary: Rep[Option[Char]] = column[Option[Char]]("PRIMARY_SECONDARY")
-    /** Database column LEGAL_PARCEL_ID SqlType(VARCHAR), Length(20,true) */
-    val legalParcelId: Rep[Option[String]] = column[Option[String]]("LEGAL_PARCEL_ID", O.Length(20,varying=true))
-    /** Database column DATE_CREATED SqlType(DATE) */
-    val dateCreated: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_CREATED")
-  }
-  /** Collection-like TableQuery object for table AddressView */
-  lazy val AddressView = new TableQuery(tag => new AddressView(tag))
 
   /** Entity class storing rows of table FlatTypeAut
    *  @param code Database column CODE SqlType(VARCHAR), PrimaryKey, Length(7,true)
@@ -851,34 +867,63 @@ trait GnafTables {
   /** Collection-like TableQuery object for table LocalityPoint */
   lazy val LocalityPoint = new TableQuery(tag => new LocalityPoint(tag))
 
-  /** Entity class storing rows of table Mb2011
-   *  @param mb2011Pid Database column MB_2011_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
+  /** Entity class storing rows of table Mb2016
+   *  @param mb2016Pid Database column MB_2016_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
    *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
    *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
-   *  @param mb2011Code Database column MB_2011_CODE SqlType(VARCHAR), Length(15,true) */
-  case class Mb2011Row(mb2011Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], mb2011Code: String)
-  /** GetResult implicit for fetching Mb2011Row objects using plain SQL queries */
-  implicit def GetResultMb2011Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[Mb2011Row] = GR{
+   *  @param mb2016Code Database column MB_2016_CODE SqlType(VARCHAR), Length(15,true) */
+  case class Mb2016Row(mb2016Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], mb2016Code: String)
+  /** GetResult implicit for fetching Mb2016Row objects using plain SQL queries */
+  implicit def GetResultMb2016Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[Mb2016Row] = GR{
     prs => import prs._
-    Mb2011Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String]))
+    Mb2016Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String]))
   }
-  /** Table description of table MB_2011. Objects of this class serve as prototypes for rows in queries. */
-  class Mb2011(_tableTag: Tag) extends Table[Mb2011Row](_tableTag, "MB_2011") {
-    def * = (mb2011Pid, dateCreated, dateRetired, mb2011Code) <> (Mb2011Row.tupled, Mb2011Row.unapply)
+  /** Table description of table MB_2016. Objects of this class serve as prototypes for rows in queries. */
+  class Mb2016(_tableTag: Tag) extends Table[Mb2016Row](_tableTag, "MB_2016") {
+    def * = (mb2016Pid, dateCreated, dateRetired, mb2016Code) <> (Mb2016Row.tupled, Mb2016Row.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(mb2011Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(mb2011Code)).shaped.<>({r=>import r._; _1.map(_=> Mb2011Row.tupled((_1.get, _2.get, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(mb2016Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(mb2016Code)).shaped.<>({r=>import r._; _1.map(_=> Mb2016Row.tupled((_1.get, _2.get, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column MB_2011_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
-    val mb2011Pid: Rep[String] = column[String]("MB_2011_PID", O.PrimaryKey, O.Length(15,varying=true))
+    /** Database column MB_2016_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
+    val mb2016Pid: Rep[String] = column[String]("MB_2016_PID", O.PrimaryKey, O.Length(15,varying=true))
     /** Database column DATE_CREATED SqlType(DATE) */
     val dateCreated: Rep[java.sql.Date] = column[java.sql.Date]("DATE_CREATED")
     /** Database column DATE_RETIRED SqlType(DATE) */
     val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
-    /** Database column MB_2011_CODE SqlType(VARCHAR), Length(15,true) */
-    val mb2011Code: Rep[String] = column[String]("MB_2011_CODE", O.Length(15,varying=true))
+    /** Database column MB_2016_CODE SqlType(VARCHAR), Length(15,true) */
+    val mb2016Code: Rep[String] = column[String]("MB_2016_CODE", O.Length(15,varying=true))
   }
-  /** Collection-like TableQuery object for table Mb2011 */
-  lazy val Mb2011 = new TableQuery(tag => new Mb2011(tag))
+  /** Collection-like TableQuery object for table Mb2016 */
+  lazy val Mb2016 = new TableQuery(tag => new Mb2016(tag))
+
+  /** Entity class storing rows of table Mb2021
+   *  @param mb2021Pid Database column MB_2021_PID SqlType(VARCHAR), PrimaryKey, Length(15,true)
+   *  @param dateCreated Database column DATE_CREATED SqlType(DATE)
+   *  @param dateRetired Database column DATE_RETIRED SqlType(DATE)
+   *  @param mb2021Code Database column MB_2021_CODE SqlType(VARCHAR), Length(15,true) */
+  case class Mb2021Row(mb2021Pid: String, dateCreated: java.sql.Date, dateRetired: Option[java.sql.Date], mb2021Code: String)
+  /** GetResult implicit for fetching Mb2021Row objects using plain SQL queries */
+  implicit def GetResultMb2021Row(implicit e0: GR[String], e1: GR[java.sql.Date], e2: GR[Option[java.sql.Date]]): GR[Mb2021Row] = GR{
+    prs => import prs._
+    Mb2021Row.tupled((<<[String], <<[java.sql.Date], <<?[java.sql.Date], <<[String]))
+  }
+  /** Table description of table MB_2021. Objects of this class serve as prototypes for rows in queries. */
+  class Mb2021(_tableTag: Tag) extends Table[Mb2021Row](_tableTag, "MB_2021") {
+    def * = (mb2021Pid, dateCreated, dateRetired, mb2021Code) <> (Mb2021Row.tupled, Mb2021Row.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(mb2021Pid), Rep.Some(dateCreated), dateRetired, Rep.Some(mb2021Code)).shaped.<>({r=>import r._; _1.map(_=> Mb2021Row.tupled((_1.get, _2.get, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column MB_2021_PID SqlType(VARCHAR), PrimaryKey, Length(15,true) */
+    val mb2021Pid: Rep[String] = column[String]("MB_2021_PID", O.PrimaryKey, O.Length(15,varying=true))
+    /** Database column DATE_CREATED SqlType(DATE) */
+    val dateCreated: Rep[java.sql.Date] = column[java.sql.Date]("DATE_CREATED")
+    /** Database column DATE_RETIRED SqlType(DATE) */
+    val dateRetired: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("DATE_RETIRED")
+    /** Database column MB_2021_CODE SqlType(VARCHAR), Length(15,true) */
+    val mb2021Code: Rep[String] = column[String]("MB_2021_CODE", O.Length(15,varying=true))
+  }
+  /** Collection-like TableQuery object for table Mb2021 */
+  lazy val Mb2021 = new TableQuery(tag => new Mb2021(tag))
 
   /** Entity class storing rows of table MbMatchCodeAut
    *  @param code Database column CODE SqlType(VARCHAR), PrimaryKey, Length(15,true)
