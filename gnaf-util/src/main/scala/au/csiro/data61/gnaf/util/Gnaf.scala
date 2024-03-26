@@ -50,7 +50,7 @@ object Gnaf {
     implicit val streetFormat = jsonFormat5(Street)
     implicit val locVarFormat = jsonFormat1(LocalityVariant)
     implicit val locationFormat = jsonFormat2(Location)
-    implicit val addressFormat = jsonFormat21(Address)
+    implicit val addressFormat = jsonFormat22(Address)
   }
   
 }

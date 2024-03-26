@@ -112,7 +112,7 @@ object Extractor {
     val streetTypeMap: FutStrMap = db.run((for (s <- StreetTypeAut) yield s.code -> s.name).result).map(_.toMap)
     val streetSuffixMap: FutStrMap = db.run((for (s <- StreetSuffixAut) yield s.code -> s.name).result).map(_.toMap)
 
-    val localities: Future[Seq[(String, String, String)]] = db.run((for (loc <- Locality if loc.localityClassCode === 'G') yield (loc.localityPid, loc.localityName, loc.statePid, loc.primaryPostcode)).result)
+    val localities: Future[Seq[(String, String, String, Option[String])]] = db.run((for (loc <- Locality if loc.localityClassCode === 'G') yield (loc.localityPid, loc.localityName, loc.statePid, loc.primaryPostcode)).result)
     val done: Future[Unit] = localities.flatMap { seq =>
       log.info("got all localities")
       val seqFut: Seq[Future[Unit]] = seq.map {
@@ -163,7 +163,7 @@ object Extractor {
  */
 
   def doLocality(
-    localityPid: String, localityName: String, statePid: String, primaryPostcode: String,
+    localityPid: String, localityName: String, statePid: String, primaryPostcode: Option[String],
     stateMap: Future[Map[String, (String, String)]], flatTypeMap: FutStrMap, streetTypeMap: FutStrMap, streetSuffixMap: FutStrMap
   )(
     implicit db: Database
