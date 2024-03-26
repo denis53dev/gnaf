@@ -21,7 +21,7 @@ object Gnaf {
                      flatTypeCode: Option[String], flatTypeName: Option[String], flat: PreNumSuf,
                      levelTypeCode: Option[String], levelTypeName: Option[String], level: PreNumSuf,
                      numberFirst: PreNumSuf, numberLast: PreNumSuf,
-                     street: Option[Street], localityName: String, stateAbbreviation: String, stateName: String, postcode: Option[String],
+                     street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String],
                      aliasPrincipal: Option[Char], primarySecondary: Option[Char],
                      location: Option[Location], streetVariant: Seq[Street], localityVariant: Seq[LocalityVariant]) {
         

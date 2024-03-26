@@ -112,12 +112,12 @@ object Extractor {
     val streetTypeMap: FutStrMap = db.run((for (s <- StreetTypeAut) yield s.code -> s.name).result).map(_.toMap)
     val streetSuffixMap: FutStrMap = db.run((for (s <- StreetSuffixAut) yield s.code -> s.name).result).map(_.toMap)
 
-    val localities: Future[Seq[(String, String, String)]] = db.run((for (loc <- Locality if loc.localityClassCode === 'G') yield (loc.localityPid, loc.localityName, loc.statePid)).result)
+    val localities: Future[Seq[(String, String, String)]] = db.run((for (loc <- Locality if loc.localityClassCode === 'G') yield (loc.localityPid, loc.localityName, loc.statePid, loc.primaryPostcode)).result)
     val done: Future[Unit] = localities.flatMap { seq =>
       log.info("got all localities")
       val seqFut: Seq[Future[Unit]] = seq.map {
-        case (localityPid, localityName, statePid) =>
-          val locDone = doLocality(localityPid, localityName, statePid, stateMap, flatTypeMap, streetTypeMap, streetSuffixMap)
+        case (localityPid, localityName, statePid, primaryPostcode) =>
+          val locDone = doLocality(localityPid, localityName, statePid, primaryPostcode, stateMap, flatTypeMap, streetTypeMap, streetSuffixMap)
           Await.result(locDone, c.localityTimeout.minute) // without this it runs out of memory before outputting anything!
           locDone
       }
@@ -163,7 +163,7 @@ object Extractor {
  */
 
   def doLocality(
-    localityPid: String, localityName: String, statePid: String,
+    localityPid: String, localityName: String, statePid: String, primaryPostcode: String,
     stateMap: Future[Map[String, (String, String)]], flatTypeMap: FutStrMap, streetTypeMap: FutStrMap, streetSuffixMap: FutStrMap
   )(
     implicit db: Database
@@ -205,7 +205,7 @@ object Extractor {
             PreNumSuf(numberFirstPrefix, numberFirst, numberFirstSuffix),
             PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),
             street.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
-            localityName, stateAbbreviation, stateName, postcode,
+            localityName, primaryPostcode, stateAbbreviation, stateName, postcode,
             aliasPrincipal, primarySecondary,
             location.flatMap {
               case (Some(lat), Some(lon)) => Some(Location(lat, lon))
