@@ -7,6 +7,17 @@ set -ex
 version=`sed 's/.*"\(.*\)"/\1/' version.sbt`
 scalaVersion=2.11
 
+set +e
+src/main/script/checkupdates.sh
+updateStatus=$?
+set -e
+
+if [[ $updateStatus -eq 1 ]]; then
+    exit 0
+else
+    echo "New data found"
+fi
+
 # optional recovery from gnaf-extractor connection timeout after successful population of database
 if [[ "$1" != "skip" ]]; then
 
