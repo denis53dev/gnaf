@@ -25,7 +25,7 @@ object Gnaf {
                      flatTypeCode: Option[String], flatTypeName: Option[String], lot: PreNumSufString, flat: PreNumSuf,
                      levelTypeCode: Option[String], levelTypeName: Option[String], level: PreNumSuf,
                      numberFirst: PreNumSuf, numberLast: PreNumSuf,
-                     street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String],
+                     street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String], privateStreet: Option[String],
                      aliasPrincipal: Option[Char], primarySecondary: Option[Char], geocodeTypeCode: Option[String],
                      location: Option[Location], streetVariant: Seq[Street], localityVariant: Seq[LocalityVariant]) {
         
@@ -75,6 +75,7 @@ object Gnaf {
         "stateAbbreviation" -> JsString(a.stateAbbreviation),
         "stateName" -> JsString(a.stateName),
         "postcode" -> a.postcode.toJson,
+        "privateStreet" -> a.privateStreet.toJson,
         "aliasPrincipal" -> a.aliasPrincipal.toJson,
         "primarySecondary" -> a.primarySecondary.toJson,
         "geocodeTypeCode" -> a.geocodeTypeCode.toJson,
@@ -105,6 +106,7 @@ object Gnaf {
           stateAbbreviation = obj.fields("stateAbbreviation").convertTo[String],
           stateName = obj.fields("stateName").convertTo[String],
           postcode = obj.fields.get("postcode").flatMap(_.convertTo[Option[String]]),
+          privateStreet = obj.fields.get("privateStreet").flatMap(_.convertTo[Option[String]]),
           aliasPrincipal = obj.fields.get("aliasPrincipal").flatMap(_.convertTo[Option[Char]]),
           primarySecondary = obj.fields.get("primarySecondary").flatMap(_.convertTo[Option[Char]]),
           geocodeTypeCode = obj.fields.get("geocodeTypeCode").flatMap(_.convertTo[Option[String]]),

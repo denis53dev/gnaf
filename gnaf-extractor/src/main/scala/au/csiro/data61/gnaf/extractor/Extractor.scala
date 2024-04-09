@@ -207,7 +207,7 @@ object Extractor {
             PreNumSuf(numberFirstPrefix, numberFirst, numberFirstSuffix),
             PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),
             street.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
-            localityName, primaryPostcode, stateAbbreviation, stateName, postcode,
+            localityName, primaryPostcode, stateAbbreviation, stateName, postcode, privateStreet
             aliasPrincipal, primarySecondary, geocodeTypeCode,
             location.flatMap {
               case (_, Some(lat), Some(lon)) => Some(Location(lat, lon))
