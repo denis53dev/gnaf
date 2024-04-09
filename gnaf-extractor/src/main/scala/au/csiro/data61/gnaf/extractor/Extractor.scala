@@ -81,7 +81,7 @@ object Extractor {
       lta.map(_.name),
       as.map(_.addressSiteName),
       sl.map(sl => (sl.streetName, sl.streetTypeCode, sl.streetSuffixCode)),
-      adg.map(adg => (adg.latitude, adg.longitude)))
+      adg.map(adg => (adg.geocodeTypeCode, adg.latitude, adg.longitude)))
     Compiled(q _)
   }
 
@@ -198,7 +198,9 @@ object Extractor {
             ssm <- streetSuffixMap
             locVar <- locVariant
             sla <- streetLocalityAlias(streetLocalityPid)
-          } yield Address(
+          } yield {
+            val geocodeTypeCode = location.map(_._1)
+            Address(
             addressDetailPid, addressSiteName.flatten, buildingName,
             flatTypeCode, flatTypeCode.map(ftm), PreNumSuf(flatNumberPrefix, flatNumber, flatNumberSuffix),
             levelTypeCode, levelTypeName, PreNumSuf(levelNumberPrefix, levelNumber, levelNumberSuffix),
@@ -206,13 +208,14 @@ object Extractor {
             PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),
             street.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
             localityName, primaryPostcode, stateAbbreviation, stateName, postcode,
-            aliasPrincipal, primarySecondary,
+            aliasPrincipal, primarySecondary, geocodeTypeCode,
             location.flatMap {
-              case (Some(lat), Some(lon)) => Some(Location(lat, lon))
+              case (_, Some(lat), Some(lon)) => Some(Location(lat, lon))
               case _                      => None
             },
             sla.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
             locVar)
+          }
 
           addr.onComplete {
             case Success(a) => println(a.toJson.compactPrint) // println appears to be synchronized

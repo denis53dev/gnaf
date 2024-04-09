@@ -9,7 +9,7 @@ import org.apache.lucene.document.{ Document, DoublePoint, Field }
 import au.csiro.data61.gnaf.lucene.GnafLucene._
 import au.csiro.data61.gnaf.lucene.LuceneUtil.directory
 import au.csiro.data61.gnaf.util.Gnaf.Address
-import au.csiro.data61.gnaf.util.Gnaf.JsonProtocol.addressFormat
+import au.csiro.data61.gnaf.util.Gnaf.JsonProtocol.AddressJsonFormat
 import au.csiro.data61.gnaf.util.Util.getLogger
 import resource.managed
 import spray.json.pimpString

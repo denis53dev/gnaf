@@ -1,6 +1,6 @@
 package au.csiro.data61.gnaf.util
 
-import spray.json.DefaultJsonProtocol
+import spray.json._
 
 object Gnaf {
   
@@ -22,7 +22,7 @@ object Gnaf {
                      levelTypeCode: Option[String], levelTypeName: Option[String], level: PreNumSuf,
                      numberFirst: PreNumSuf, numberLast: PreNumSuf,
                      street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String],
-                     aliasPrincipal: Option[Char], primarySecondary: Option[Char],
+                     aliasPrincipal: Option[Char], primarySecondary: Option[Char], geocodeTypeCode: Option[String],
                      location: Option[Location], streetVariant: Seq[Street], localityVariant: Seq[LocalityVariant]) {
         
     def toD61Address = {
@@ -50,7 +50,69 @@ object Gnaf {
     implicit val streetFormat = jsonFormat5(Street)
     implicit val locVarFormat = jsonFormat1(LocalityVariant)
     implicit val locationFormat = jsonFormat2(Location)
-    implicit val addressFormat = jsonFormat22(Address)
+    implicit object AddressJsonFormat extends RootJsonFormat[Address] {
+      def write(a: Address): JsValue = JsObject(
+        "addressDetailPid" -> JsString(a.addressDetailPid),
+        "addressSiteName" -> a.addressSiteName.toJson,
+        "buildingName" -> a.buildingName.toJson,
+        "flatTypeCode" -> a.flatTypeCode.toJson,
+        "flatTypeName" -> a.flatTypeName.toJson,
+        "flat" -> a.flat.toJson,
+        "levelTypeCode" -> a.levelTypeCode.toJson,
+        "levelTypeName" -> a.levelTypeName.toJson,
+        "level" -> a.level.toJson,
+        "numberFirst" -> a.numberFirst.toJson,
+        "numberLast" -> a.numberLast.toJson,
+        "street" -> a.street.toJson,
+        "localityName" -> JsString(a.localityName),
+        "primaryPostcode" -> a.primaryPostcode.toJson,
+        "stateAbbreviation" -> JsString(a.stateAbbreviation),
+        "stateName" -> JsString(a.stateName),
+        "postcode" -> a.postcode.toJson,
+        "aliasPrincipal" -> a.aliasPrincipal.toJson,
+        "primarySecondary" -> a.primarySecondary.toJson,
+        "geocodeTypeCode" -> a.geocodeTypeCode.toJson,
+        "location" -> a.location.toJson,
+        "streetVariant" -> a.streetVariant.toJson,
+        "localityVariant" -> a.localityVariant.toJson
+      )
+
+      def read(value: JsValue): Address = {
+        val obj = value.asJsObject
+
+        Address(
+          addressDetailPid = obj.fields("addressDetailPid").convertTo[String],
+          addressSiteName = obj.fields.get("addressSiteName").flatMap(_.convertTo[Option[String]]),
+          buildingName = obj.fields.get("buildingName").flatMap(_.convertTo[Option[String]]),
+          flatTypeCode = obj.fields.get("flatTypeCode").flatMap(_.convertTo[Option[String]]),
+          flatTypeName = obj.fields.get("flatTypeName").flatMap(_.convertTo[Option[String]]),
+          flat = obj.fields("flat").convertTo[PreNumSuf],
+          levelTypeCode = obj.fields.get("levelTypeCode").flatMap(_.convertTo[Option[String]]),
+          levelTypeName = obj.fields.get("levelTypeName").flatMap(_.convertTo[Option[String]]),
+          level = obj.fields("level").convertTo[PreNumSuf],
+          numberFirst = obj.fields("numberFirst").convertTo[PreNumSuf],
+          numberLast = obj.fields("numberLast").convertTo[PreNumSuf],
+          street = obj.fields.get("street").flatMap(_.convertTo[Option[Street]]),
+          localityName = obj.fields("localityName").convertTo[String],
+          primaryPostcode = obj.fields.get("primaryPostcode").flatMap(_.convertTo[Option[String]]),
+          stateAbbreviation = obj.fields("stateAbbreviation").convertTo[String],
+          stateName = obj.fields("stateName").convertTo[String],
+          postcode = obj.fields.get("postcode").flatMap(_.convertTo[Option[String]]),
+          aliasPrincipal = obj.fields.get("aliasPrincipal").flatMap(_.convertTo[Option[Char]]),
+          primarySecondary = obj.fields.get("primarySecondary").flatMap(_.convertTo[Option[Char]]),
+          geocodeTypeCode = obj.fields.get("geocodeTypeCode").flatMap(_.convertTo[Option[String]]),
+          location = obj.fields.get("location").flatMap(_.convertTo[Option[Location]]),
+          streetVariant = obj.fields.get("streetVariant") match {
+            case Some(jsValue) => jsValue.convertTo[Seq[Street]]
+            case None => Seq.empty[Street] // Provide an empty sequence as default
+          },
+          localityVariant = obj.fields.get("localityVariant") match {
+            case Some(jsValue) => jsValue.convertTo[Seq[LocalityVariant]]
+            case None => Seq.empty[LocalityVariant] // Provide an empty sequence as default
+          }
+        )
+      }
+    }
   }
   
 }
