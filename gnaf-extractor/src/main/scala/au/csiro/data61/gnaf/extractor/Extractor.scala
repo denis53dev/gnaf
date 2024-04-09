@@ -70,19 +70,34 @@ object Extractor {
 
   val qAddressDetail = {
     def q(localityPid: Rep[String]) = for {
-      ((((ad, lta), as), sl), adg) <- AddressDetail joinLeft
+      (((((ad, lta), as), sl), adg), asg) <- AddressDetail joinLeft
         LevelTypeAut on (_.levelTypeCode === _.code) joinLeft  // only 15 rows so keep in memory
         AddressSite on (_._1.addressSitePid === _.addressSitePid) joinLeft // ADDRESS_DETAIL.ADDRESS_SITE_PID is NON NULL, so no need for LEFT JOIN
         StreetLocality on (_._1._1.streetLocalityPid === _.streetLocalityPid) joinLeft
-        AddressDefaultGeocode on (_._1._1._1.addressDetailPid === _.addressDetailPid)
+        AddressDefaultGeocode on (_._1._1._1.addressDetailPid === _.addressDetailPid) joinLeft
+        AddressSiteGeocode on (_._1._1._1._1.addressSitePid === _.addressSitePid)
       if (ad.localityPid === localityPid && ad.confidence > -1)
     } yield (
       ad,
       lta.map(_.name),
-      as.map(_.addressSiteName),
+      as.map(as => (as.addressSiteName, as.addressType)),
       sl.map(sl => (sl.streetName, sl.streetTypeCode, sl.streetSuffixCode)),
-      adg.map(adg => (adg.geocodeTypeCode, adg.latitude, adg.longitude)))
+      adg.map(adg => (adg.geocodeTypeCode, adg.latitude, adg.longitude)),
+      asg.map(asg => (asg.addressSiteGeocodePid, asg.geocodeSiteName, asg.reliabilityCode, asg.elevation))
+      )
     Compiled(q _)
+  }
+
+  val qLocalityNeighbourInfo = {
+    def q(localityPid: Rep[String]) = for (ln <- LocalityNeighbour if ln.localityPid === localityPid) yield (ln.localityNeighbourPid, ln.neighbourLocalityPid)
+    Compiled(q _)
+  }
+  def localityNeighbour(localityPid: String)(implicit db: Database): Future[Seq[LocalityNeighbourInfo]] = {
+    db.run(qLocalityNeighbourInfo(localityPid).result).map(
+      _.map { case (localityNeighbourPid, neighbourLocalityPid) => 
+        LocalityNeighbourInfo(localityNeighbourPid, neighbourLocalityPid)
+      }
+    )
   }
 
   val qLocalityAliasName = {
@@ -170,6 +185,7 @@ object Extractor {
   ): Future[Unit] = {
     val state = stateMap.map(_.apply(statePid))
     val locVariant = localityVariant(localityPid)
+    val locNeighbour = localityNeighbour(localityPid)
 
     log.info(s"starting locality $localityName")
     db.run(qAddressDetail(localityPid).result).flatMap { seq =>
@@ -186,9 +202,10 @@ object Extractor {
             streetLocalityPid :: locationDescription :: localityPid :: aliasPrincipal :: postcode :: privateStreet :: legalParcelId :: confidence ::
             addressSitePid :: levelGeocodedCode :: propertyPid :: gnafPropertyPid :: primarySecondary :: HNil,
           levelTypeName,
-          addressSiteName,
+          addressSite,
           street,
-          location
+          location,
+          asg
           ) =>
 
           val addr: Future[Address] = for {
@@ -197,24 +214,35 @@ object Extractor {
             stm <- streetTypeMap
             ssm <- streetSuffixMap
             locVar <- locVariant
+            locN <- locNeighbour
             sla <- streetLocalityAlias(streetLocalityPid)
           } yield {
+            val addressSiteName = addressSite.map(_._1)
+            val addressType = addressSite.map(_._2)
             val geocodeTypeCode = location.map(_._1)
+            val addressSiteGeocodePid = asg.map(_._1)
+            val geocodeSiteName = asg.map(_._2)
+            val reliabilityCode = asg.map(_._3)
+            val elevation = asg.map(_._4)
             Address(
-            addressDetailPid, addressSiteName.flatten, buildingName,
-            flatTypeCode, flatTypeCode.map(ftm), PreNumSufString(lotNumberPrefix, lotNumber, lotNumberSuffix), PreNumSuf(flatNumberPrefix, flatNumber, flatNumberSuffix),
-            levelTypeCode, levelTypeName, PreNumSuf(levelNumberPrefix, levelNumber, levelNumberSuffix),
-            PreNumSuf(numberFirstPrefix, numberFirst, numberFirstSuffix),
-            PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),
-            street.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
-            localityName, primaryPostcode, stateAbbreviation, stateName, postcode, privateStreet
-            aliasPrincipal, primarySecondary, geocodeTypeCode,
-            location.flatMap {
-              case (_, Some(lat), Some(lon)) => Some(Location(lat, lon))
-              case _                      => None
-            },
-            sla.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
-            locVar)
+              addressDetailPid, localityPid, addressSiteName.flatten, buildingName, addressType.flatten,
+              flatTypeCode, flatTypeCode.map(ftm), PreNumSufString(lotNumberPrefix, lotNumber, lotNumberSuffix), PreNumSuf(flatNumberPrefix, flatNumber, flatNumberSuffix),
+              levelTypeCode, levelTypeName, PreNumSuf(levelNumberPrefix, levelNumber, levelNumberSuffix),
+              PreNumSuf(numberFirstPrefix, numberFirst, numberFirstSuffix),
+              PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),
+              street.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
+              localityName, primaryPostcode, stateAbbreviation, stateName, postcode,
+              privateStreet, gnafPropertyPid, addressSitePid,
+              aliasPrincipal, primarySecondary, geocodeTypeCode,
+              addressSiteGeocodePid, geocodeSiteName.flatten, reliabilityCode, elevation.flatten,
+              location.flatMap {
+                case (_, Some(lat), Some(lon)) => Some(Location(lat, lon))
+                case _                      => None
+              },
+              sla.map(s => Street(s._1, s._2, s._2.map(stm), s._3, s._3.map(ssm))),
+              locVar,
+              locN
+            )
           }
 
           addr.onComplete {

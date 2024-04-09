@@ -20,14 +20,18 @@ object Gnaf {
   
   case class Street(name: String, typeCode: Option[String], typeName: Option[String], suffixCode: Option[String], suffixName: Option[String])
   case class LocalityVariant(localityName: String)
+  case class LocalityNeighbourInfo(localityNeighbourPid: String, neighbourLocalityPid: String)
   case class Location(lat: BigDecimal, lon: BigDecimal)
-  case class Address(addressDetailPid: String, addressSiteName: Option[String], buildingName: Option[String],
+  case class Address(addressDetailPid: String, localityPid: String, addressSiteName: Option[String], buildingName: Option[String], addressType: Option[String],
                      flatTypeCode: Option[String], flatTypeName: Option[String], lot: PreNumSufString, flat: PreNumSuf,
                      levelTypeCode: Option[String], levelTypeName: Option[String], level: PreNumSuf,
                      numberFirst: PreNumSuf, numberLast: PreNumSuf,
-                     street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String], privateStreet: Option[String],
-                     aliasPrincipal: Option[Char], primarySecondary: Option[Char], geocodeTypeCode: Option[String],
-                     location: Option[Location], streetVariant: Seq[Street], localityVariant: Seq[LocalityVariant]) {
+                     street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String],
+                     privateStreet: Option[String], gnafPropertyPid: Option[String], addressSitePid: String,
+                     aliasPrincipal: Option[Char], primarySecondary: Option[Char],
+                     geocodeTypeCode: Option[String], addressSiteGeocodePid: Option[String], geocodeSiteName: Option[String], reliabilityCode: Option[Int],
+                     elevation: Option[Int],
+                     location: Option[Location], streetVariant: Seq[Street], localityVariant: Seq[LocalityVariant], localityNeighbour: Seq[LocalityNeighbourInfo]) {
         
     def toD61Address = {
       val streetNum = numberFirst.toOptStr.map(f => f + numberLast.toOptStr.map("-" + _).getOrElse(""))
@@ -55,11 +59,14 @@ object Gnaf {
     implicit val streetFormat = jsonFormat5(Street)
     implicit val locVarFormat = jsonFormat1(LocalityVariant)
     implicit val locationFormat = jsonFormat2(Location)
+    implicit val localityNeighbourFormat = jsonFormat2(LocalityNeighbourInfo)
     implicit object AddressJsonFormat extends RootJsonFormat[Address] {
       def write(a: Address): JsValue = JsObject(
         "addressDetailPid" -> JsString(a.addressDetailPid),
+        "localityPid" -> JsString(a.localityPid),
         "addressSiteName" -> a.addressSiteName.toJson,
         "buildingName" -> a.buildingName.toJson,
+        "addressType" -> a.addressType.toJson,
         "flatTypeCode" -> a.flatTypeCode.toJson,
         "flatTypeName" -> a.flatTypeName.toJson,
         "lot" -> a.lot.toJson,
@@ -76,12 +83,19 @@ object Gnaf {
         "stateName" -> JsString(a.stateName),
         "postcode" -> a.postcode.toJson,
         "privateStreet" -> a.privateStreet.toJson,
+        "gnafPropertyPid" -> a.privateStreet.toJson,
+        "addressSitePid" -> JsString(a.addressSitePid),
         "aliasPrincipal" -> a.aliasPrincipal.toJson,
         "primarySecondary" -> a.primarySecondary.toJson,
         "geocodeTypeCode" -> a.geocodeTypeCode.toJson,
+        "addressSiteGeocodePid" -> a.addressSiteGeocodePid.toJson,
+        "geocodeSiteName" -> a.geocodeSiteName.toJson,
+        "reliabilityCode" -> a.reliabilityCode.toJson,
+        "elevation" -> a.elevation.toJson,
         "location" -> a.location.toJson,
         "streetVariant" -> a.streetVariant.toJson,
-        "localityVariant" -> a.localityVariant.toJson
+        "localityVariant" -> a.localityVariant.toJson,
+        "localityNeighbour" -> a.localityNeighbour.toJson
       )
 
       def read(value: JsValue): Address = {
@@ -89,8 +103,10 @@ object Gnaf {
 
         Address(
           addressDetailPid = obj.fields("addressDetailPid").convertTo[String],
+          localityPid = obj.fields("localityPid").convertTo[String],
           addressSiteName = obj.fields.get("addressSiteName").flatMap(_.convertTo[Option[String]]),
           buildingName = obj.fields.get("buildingName").flatMap(_.convertTo[Option[String]]),
+          addressType = obj.fields.get("addressType").flatMap(_.convertTo[Option[String]]),
           flatTypeCode = obj.fields.get("flatTypeCode").flatMap(_.convertTo[Option[String]]),
           flatTypeName = obj.fields.get("flatTypeName").flatMap(_.convertTo[Option[String]]),
           lot = obj.fields("lot").convertTo[PreNumSufString],
@@ -107,9 +123,15 @@ object Gnaf {
           stateName = obj.fields("stateName").convertTo[String],
           postcode = obj.fields.get("postcode").flatMap(_.convertTo[Option[String]]),
           privateStreet = obj.fields.get("privateStreet").flatMap(_.convertTo[Option[String]]),
+          gnafPropertyPid = obj.fields.get("gnafPropertyPid").flatMap(_.convertTo[Option[String]]),
+          addressSitePid = obj.fields("addressSitePid").convertTo[String],
           aliasPrincipal = obj.fields.get("aliasPrincipal").flatMap(_.convertTo[Option[Char]]),
           primarySecondary = obj.fields.get("primarySecondary").flatMap(_.convertTo[Option[Char]]),
           geocodeTypeCode = obj.fields.get("geocodeTypeCode").flatMap(_.convertTo[Option[String]]),
+          addressSiteGeocodePid = obj.fields.get("addressSiteGeocodePid").flatMap(_.convertTo[Option[String]]),
+          geocodeSiteName = obj.fields.get("geocodeSiteName").flatMap(_.convertTo[Option[String]]),
+          reliabilityCode = obj.fields.get("reliabilityCode").flatMap(_.convertTo[Option[Int]]),
+          elevation = obj.fields.get("elevation").flatMap(_.convertTo[Option[Int]]),
           location = obj.fields.get("location").flatMap(_.convertTo[Option[Location]]),
           streetVariant = obj.fields.get("streetVariant") match {
             case Some(jsValue) => jsValue.convertTo[Seq[Street]]
@@ -118,6 +140,10 @@ object Gnaf {
           localityVariant = obj.fields.get("localityVariant") match {
             case Some(jsValue) => jsValue.convertTo[Seq[LocalityVariant]]
             case None => Seq.empty[LocalityVariant] // Provide an empty sequence as default
+          },
+          localityNeighbour = obj.fields.get("localityNeighbour") match {
+            case Some(jsValue) => jsValue.convertTo[Seq[LocalityNeighbourInfo]]
+            case None => Seq.empty[LocalityNeighbourInfo] // Provide an empty sequence as default
           }
         )
       }
