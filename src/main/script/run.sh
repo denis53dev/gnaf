@@ -7,6 +7,9 @@ set -ex
 version=`sed 's/.*"\(.*\)"/\1/' version.sbt`
 scalaVersion=2.11
 
+# optional recovery from gnaf-extractor connection timeout after successful population of database
+if [[ "$1" != "skip" ]]; then
+
 set +e
 src/main/script/checkupdates.sh
 updateStatus=$?
@@ -17,9 +20,6 @@ if [[ $updateStatus -eq 1 ]]; then
 else
     echo "New data found"
 fi
-
-# optional recovery from gnaf-extractor connection timeout after successful population of database
-if [[ "$1" != "skip" ]]; then
 
 # === Delete/Create database ===
 

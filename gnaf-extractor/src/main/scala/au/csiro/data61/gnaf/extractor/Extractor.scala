@@ -202,7 +202,7 @@ object Extractor {
             val geocodeTypeCode = location.map(_._1)
             Address(
             addressDetailPid, addressSiteName.flatten, buildingName,
-            flatTypeCode, flatTypeCode.map(ftm), PreNumSuf(flatNumberPrefix, flatNumber, flatNumberSuffix),
+            flatTypeCode, flatTypeCode.map(ftm), PreNumSufString(lotNumberPrefix, lotNumber, lotNumberSuffix), PreNumSuf(flatNumberPrefix, flatNumber, flatNumberSuffix),
             levelTypeCode, levelTypeName, PreNumSuf(levelNumberPrefix, levelNumber, levelNumberSuffix),
             PreNumSuf(numberFirstPrefix, numberFirst, numberFirstSuffix),
             PreNumSuf(numberLastPrefix, numberLast, numberLastSuffix),

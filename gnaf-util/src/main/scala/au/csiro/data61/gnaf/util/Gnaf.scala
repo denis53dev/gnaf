@@ -13,12 +13,16 @@ object Gnaf {
   case class PreNumSuf(prefix: Option[String], number: Option[Int], suffix: Option[String]) {
     def toOptStr = join(Seq(prefix, d61Num(number), suffix), "")
   }
+
+  case class PreNumSufString(prefix: Option[String], number: Option[String], suffix: Option[String]) {
+    def toOptStr = join(Seq(prefix, number, suffix), "")
+  }
   
   case class Street(name: String, typeCode: Option[String], typeName: Option[String], suffixCode: Option[String], suffixName: Option[String])
   case class LocalityVariant(localityName: String)
   case class Location(lat: BigDecimal, lon: BigDecimal)
   case class Address(addressDetailPid: String, addressSiteName: Option[String], buildingName: Option[String],
-                     flatTypeCode: Option[String], flatTypeName: Option[String], flat: PreNumSuf,
+                     flatTypeCode: Option[String], flatTypeName: Option[String], lot: PreNumSufString, flat: PreNumSuf,
                      levelTypeCode: Option[String], levelTypeName: Option[String], level: PreNumSuf,
                      numberFirst: PreNumSuf, numberLast: PreNumSuf,
                      street: Option[Street], localityName: String, primaryPostcode: Option[String], stateAbbreviation: String, stateName: String, postcode: Option[String],
@@ -47,6 +51,7 @@ object Gnaf {
 
   object JsonProtocol extends DefaultJsonProtocol {
     implicit val preNumSufFormat = jsonFormat3(PreNumSuf)
+    implicit val preNumSufStringFormat = jsonFormat3(PreNumSufString)
     implicit val streetFormat = jsonFormat5(Street)
     implicit val locVarFormat = jsonFormat1(LocalityVariant)
     implicit val locationFormat = jsonFormat2(Location)
@@ -57,6 +62,7 @@ object Gnaf {
         "buildingName" -> a.buildingName.toJson,
         "flatTypeCode" -> a.flatTypeCode.toJson,
         "flatTypeName" -> a.flatTypeName.toJson,
+        "lot" -> a.lot.toJson,
         "flat" -> a.flat.toJson,
         "levelTypeCode" -> a.levelTypeCode.toJson,
         "levelTypeName" -> a.levelTypeName.toJson,
@@ -86,6 +92,7 @@ object Gnaf {
           buildingName = obj.fields.get("buildingName").flatMap(_.convertTo[Option[String]]),
           flatTypeCode = obj.fields.get("flatTypeCode").flatMap(_.convertTo[Option[String]]),
           flatTypeName = obj.fields.get("flatTypeName").flatMap(_.convertTo[Option[String]]),
+          lot = obj.fields("lot").convertTo[PreNumSufString],
           flat = obj.fields("flat").convertTo[PreNumSuf],
           levelTypeCode = obj.fields.get("levelTypeCode").flatMap(_.convertTo[Option[String]]),
           levelTypeName = obj.fields.get("levelTypeName").flatMap(_.convertTo[Option[String]]),
